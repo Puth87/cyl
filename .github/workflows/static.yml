@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>玩家图鉴 PLAYER CORE · 测出你的游戏人格</title>
+<meta name="description" content="8 道题，3 种玩家原型。从你的每一次选择里，读出你真正在游戏里寻找什么。">
+<meta name="theme-color" content="#08070f">
+<meta property="og:title" content="玩家图鉴 · 测出你的游戏人格">
+<meta property="og:description" content="8 道题，3 种玩家原型。你是什么样的玩家？">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='.5' stop-color='%23ff4e9b'/%3E%3Cstop offset='1' stop-color='%23ffb45c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='%2308070f'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' transform='rotate(45 16 16)' fill='url(%23g)'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#08070f; --ink-2:#0e0c1c;
+  --text:#f1efff; --muted:#8f8bb0; --dim:#615d80;
+  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.22);
+  --panel:rgba(255,255,255,.045);
+  --v:#7c5cff; --p:#ff4e9b; --a:#ffb45c; --c:#43e5c8;
+  --holo:linear-gradient(100deg,#7c5cff 0%,#b45cff 24%,#ff4e9b 50%,#ffb45c 74%,#43e5c8 100%);
+  --r:22px;
+  --ff:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --fm:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+html,body{height:100%}
+body{
+  margin:0;background:var(--ink);color:var(--text);font-family:var(--ff);
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  letter-spacing:.01em;
+}
+/* ---------- ambient background ---------- */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg i{position:absolute;display:block;border-radius:50%;filter:blur(90px);opacity:.5}
+.g1{width:62vw;height:62vw;max-width:520px;max-height:520px;left:-18vw;top:-14vh;background:radial-gradient(circle,rgba(124,92,255,.85),transparent 68%)}
+.g2{width:56vw;height:56vw;max-width:480px;max-height:480px;right:-20vw;top:26vh;background:radial-gradient(circle,rgba(255,78,155,.62),transparent 68%)}
+.g3{width:50vw;height:50vw;max-width:420px;max-height:420px;left:10vw;bottom:-22vh;background:radial-gradient(circle,rgba(67,229,200,.34),transparent 68%);opacity:.4}
+.bg .grid{position:absolute;inset:-1px;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+  background-size:58px 58px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 65% at 50% 40%,#000 25%,transparent 100%);
+  mask-image:radial-gradient(ellipse 80% 65% at 50% 40%,#000 25%,transparent 100%);
+}
+.bg .noise{position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* ---------- layout ---------- */
+.stage{position:relative;z-index:2;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;max-width:560px;margin:0 auto;padding:26px 22px calc(30px + env(safe-area-inset-bottom))}
+.screen{display:none;width:100%;margin:auto 0}
+.screen.is-active{display:block;animation:screenIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes screenIn{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+/* ---------- primitives ---------- */
+.mono{font-family:var(--fm);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.holo-border{position:relative}
+.holo-border::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:var(--holo);opacity:.6;pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.btn{appearance:none;border:0;cursor:pointer;font-family:inherit;font-size:15px;font-weight:800;letter-spacing:.02em;
+  width:100%;padding:17px 22px;border-radius:16px;transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .25s,filter .25s;position:relative}
+.btn:active{transform:scale(.978)}
+.btn-primary{background:var(--holo);background-size:180% 100%;color:#0b0912;
+  box-shadow:0 14px 34px -12px rgba(255,78,155,.75),0 8px 24px -10px rgba(124,92,255,.8)}
+.btn-primary:hover{filter:saturate(1.12) brightness(1.06);box-shadow:0 18px 42px -12px rgba(255,78,155,.85),0 10px 28px -10px rgba(124,92,255,.9);transform:translateY(-2px)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line)}
+.btn-ghost:hover{background:rgba(255,255,255,.09);border-color:var(--line-2)}
+.foot-note{margin:18px 0 0;text-align:center;font-size:12px;color:var(--dim);line-height:1.7}
+/* ---------- brand ---------- */
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--fm);font-size:11px;letter-spacing:.24em;color:var(--text);text-transform:uppercase}
+.brand .mark{width:9px;height:9px;background:var(--holo);border-radius:2px;transform:rotate(45deg);box-shadow:0 0 16px rgba(255,78,155,.9);animation:spin 7s linear infinite}
+@keyframes spin{to{transform:rotate(405deg)}}
+.brand .sub{margin-left:auto;color:var(--dim);letter-spacing:.14em}
+/* ---------- home ---------- */
+.hero{text-align:center;padding:34px 0 0}
+.emblem{width:104px;height:104px;margin:0 auto;position:relative;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.16),rgba(255,255,255,.02) 55%),rgba(255,255,255,.04);
+  border:1px solid var(--line);box-shadow:inset 0 0 40px rgba(124,92,255,.28),0 22px 50px -22px rgba(124,92,255,.9)}
+.emblem::before{content:"";position:absolute;inset:-9px;border-radius:50%;background:var(--holo);opacity:.85;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));animation:spin 5s linear infinite}
+.emblem::after{content:"";position:absolute;inset:-22px;border-radius:50%;border:1px dashed rgba(255,255,255,.16);animation:spin 26s linear infinite reverse}
+.emblem svg{width:46px;height:46px;position:relative;z-index:1}
+.emblem svg [stroke]{stroke:url(#hgrad);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+h1{font-size:clamp(29px,8.4vw,40px);line-height:1.22;margin:30px 0 0;font-weight:900;letter-spacing:-.015em}
+h1 em{font-style:normal;background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{margin:18px 0 0;font-size:14.5px;line-height:1.95;color:var(--muted);max-width:400px;margin-inline:auto}
+.meta{display:flex;align-items:center;justify-content:center;gap:12px;margin:24px 0 30px;font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--muted)}
+.meta i{width:3px;height:3px;border-radius:50%;background:var(--line-2);display:block}
+/* ---------- quiz ---------- */
+.qhead-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px}
+.counter{font-family:var(--fm);font-size:13px;letter-spacing:.1em;color:var(--muted)}
+.counter b{color:var(--text);font-size:17px;font-weight:700}
+.counter s{text-decoration:none;color:var(--dim);margin:0 1px}
+.pbar{height:4px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.pbar i{display:block;height:100%;width:0;border-radius:99px;background:var(--holo);transition:width .5s cubic-bezier(.22,1,.36,1);box-shadow:0 0 14px rgba(255,78,155,.85)}
+.qbody{margin-top:38px}
+.qbody.anim{animation:qIn .42s cubic-bezier(.22,1,.36,1) both}
+@keyframes qIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.qbody.out{opacity:0;transform:translateY(-10px);transition:opacity .18s ease,transform .18s ease}
+.qtext{font-size:21px;line-height:1.6;font-weight:800;letter-spacing:-.005em;margin:0 0 24px}
+.qtext .qn{font-family:var(--fm);font-size:11px;letter-spacing:.18em;color:var(--p);display:block;margin-bottom:12px;font-weight:400}
+.opts{display:flex;flex-direction:column;gap:11px}
+.opt{display:flex;gap:14px;align-items:flex-start;text-align:left;width:100%;padding:16px 17px;border-radius:17px;
+  background:rgba(255,255,255,.042);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:15px;line-height:1.62;
+  cursor:pointer;transition:background .22s,border-color .22s,transform .22s cubic-bezier(.22,1,.36,1),box-shadow .25s}
+.opt:hover{background:rgba(255,255,255,.075);border-color:var(--line-2);transform:translateY(-2px)}
+.opt .key{flex:0 0 auto;width:25px;height:25px;border-radius:8px;display:grid;place-items:center;font-family:var(--fm);font-size:11.5px;
+  color:var(--muted);border:1px solid var(--line);transition:.22s;margin-top:1px}
+.opt.sel{background:linear-gradient(100deg,rgba(124,92,255,.22),rgba(255,78,155,.16));border-color:transparent;
+  box-shadow:0 0 0 1px rgba(255,90,160,.55),0 16px 34px -16px rgba(124,92,255,.95)}
+.opt.sel .key{background:var(--holo);color:#0b0912;border-color:transparent;font-weight:700;box-shadow:0 4px 14px -4px rgba(255,78,155,.9)}
+.opt.dim{opacity:.4}
+.ghost{appearance:none;background:none;border:0;color:var(--dim);font-family:var(--fm);font-size:11px;letter-spacing:.14em;
+  cursor:pointer;padding:14px 0 0;transition:color .2s;text-transform:uppercase}
+.ghost:hover{color:var(--muted)}
+.kbd{margin-top:20px;text-align:center;font-family:var(--fm);font-size:10.5px;letter-spacing:.16em;color:#4a4665}
+@media (hover:none){.kbd{display:none}}
+/* ---------- scanning ---------- */
+#s-scan{text-align:center}
+.scan-ring{width:158px;height:158px;margin:0 auto;position:relative}
+.scan-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.scan-ring .track{stroke:rgba(255,255,255,.08);stroke-width:5;fill:none}
+.scan-ring .prog{stroke:url(#hgrad);stroke-width:5;fill:none;stroke-linecap:round;
+  transition:stroke-dashoffset .1s linear;filter:drop-shadow(0 0 8px rgba(255,78,155,.85))}
+.scan-ring .ticks{stroke:rgba(255,255,255,.18);stroke-width:1.4;fill:none;stroke-dasharray:1.5 7;
+  transform-origin:70px 70px;animation:spin 9s linear infinite}
+.scan-num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--fm);align-content:center}
+.scan-num b{font-size:38px;font-weight:700;background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+.scan-num span{font-size:11px;color:var(--dim);letter-spacing:.2em;margin-top:6px}
+.scan-line{margin:34px 0 0;font-size:15px;color:var(--text);font-weight:600;min-height:24px}
+.scan-sub{margin:12px 0 0;font-family:var(--fm);font-size:10.5px;letter-spacing:.24em;color:var(--dim)}
+/* ---------- result ---------- */
+.res-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
+.res-no{font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--muted)}
+.res-card{padding:30px 22px 26px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));position:relative;overflow:hidden}
+.res-card::after{content:"";position:absolute;left:50%;top:-90px;width:260px;height:200px;transform:translateX(-50%);
+  background:radial-gradient(ellipse,rgba(124,92,255,.5),transparent 70%);filter:blur(26px);pointer-events:none}
+.res-emblem{position:relative;z-index:1}
+.res-emblem .emblem{width:88px;height:88px}
+.res-emblem .emblem svg{width:40px;height:40px}
+.res-name{font-size:30px;font-weight:900;margin:24px 0 0;letter-spacing:-.02em;position:relative;z-index:1}
+.res-code{font-family:var(--fm);font-size:11px;letter-spacing:.28em;color:var(--p);margin:9px 0 0;text-transform:uppercase;position:relative;z-index:1}
+.res-tags{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:20px 0 0;position:relative;z-index:1}
+.tag{font-size:12px;padding:6px 12px;border-radius:99px;color:#e9e6ff;background:rgba(255,255,255,.06);border:1px solid var(--line);
+  animation:tagIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes tagIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+.res-desc{text-align:left;margin:26px 0 0;position:relative;z-index:1}
+.res-desc p{font-size:14.5px;line-height:2;color:#c9c5e6;margin:0 0 13px}
+.res-desc p:last-child{margin-bottom:0}
+.res-desc p:first-child::first-letter{font-size:1.05em;color:#fff}
+.sec-label{display:flex;align-items:center;gap:10px;margin:26px 0 16px;position:relative;z-index:1}
+.sec-label span{font-family:var(--fm);font-size:10.5px;letter-spacing:.22em;color:var(--dim);white-space:nowrap}
+.sec-label i{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.abil{text-align:left;margin-bottom:15px;position:relative;z-index:1}
+.abil:last-child{margin-bottom:0}
+.abil-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.abil-top span{font-size:13.5px;color:#cfcbe8}
+.abil-top b{font-family:var(--fm);font-size:13px;color:#fff;font-weight:700}
+.abil-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.abil-bar i{display:block;height:100%;width:0;border-radius:99px;transition:width 1.05s cubic-bezier(.22,1,.36,1)}
+.res-file{text-align:left;margin-top:4px;position:relative;z-index:1}
+.file-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.file-row:last-child{border-bottom:0}
+.file-row span{font-family:var(--fm);font-size:10.5px;letter-spacing:.16em;color:var(--dim);flex:0 0 auto}
+.file-row b{font-size:13.5px;font-weight:600;color:#dedbf3;text-align:right}
+.res-actions{display:flex;flex-direction:column;gap:11px;margin-top:22px}
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,26px);z-index:50;opacity:0;pointer-events:none;
+  background:rgba(20,17,36,.94);border:1px solid var(--line-2);backdrop-filter:blur(16px);
+  padding:13px 20px;border-radius:14px;font-size:13px;color:var(--text);transition:.34s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 20px 44px -18px #000;max-width:82vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <i class="g1"></i><i class="g2"></i><i class="g3"></i>
+  <div class="grid"></div><div class="noise"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="hgrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c5cff"/><stop offset=".42" stop-color="#ff4e9b"/>
+      <stop offset=".72" stop-color="#ffb45c"/><stop offset="1" stop-color="#43e5c8"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<main class="stage">
+
+  <!-- ============ HOME ============ -->
+  <section class="screen is-active" id="s-home">
+    <header class="brand">
+      <span class="mark"></span>PLAYER CORE<span class="sub">玩家图鉴</span>
+    </header>
+    <div class="hero">
+      <div class="emblem" id="homeEmblem"></div>
+      <h1>你是什么样的<em>玩家</em>？</h1>
+      <p class="lede">8 道题，3 种玩家原型。<br>不是星座式的玄学，而是从你的每一次选择里，读出你真正在游戏里寻找什么。</p>
+      <div class="meta"><span>8 道题</span><i></i><span>约 60 秒</span><i></i><span>即时生成</span></div>
+      <button class="btn btn-primary" id="btnStart">开始测试</button>
+      <p class="foot-note">无需注册 · 结果仅保存在本地浏览器</p>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section class="screen" id="s-quiz">
+    <div class="qhead">
+      <div class="qhead-top">
+        <span class="mono">Question</span>
+        <span class="counter"><b id="qNow">01</b><s>/</s>08</span>
+      </div>
+      <div class="pbar"><i id="pFill"></i></div>
+    </div>
+    <div class="qbody" id="qBody">
+      <h2 class="qtext" id="qText"></h2>
+      <div class="opts" id="qOpts"></div>
+    </div>
+    <div id="qBackWrap" style="text-align:center">
+      <button class="ghost" id="btnBack">← 上一题</button>
+    </div>
+    <p class="kbd">按 1 / 2 / 3 快速选择</p>
+  </section>
+
+  <!-- ============ SCANNING ============ -->
+  <section class="screen" id="s-scan">
+    <div class="scan-ring">
+      <svg viewBox="0 0 140 140">
+        <circle class="ticks" cx="70" cy="70" r="68"/>
+        <circle class="track" cx="70" cy="70" r="58"/>
+        <circle class="prog" id="scanProg" cx="70" cy="70" r="58" transform="rotate(0 70 70)"/>
+      </svg>
+      <div class="scan-num"><b id="scanPct">0</b><span>%</span></div>
+    </div>
+    <p class="scan-line" id="scanLine">正在解析答题路径…</p>
+    <p class="scan-sub">PLAYER CORE · ANALYZING</p>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="s-result">
+    <div class="res-top">
+      <span class="mono">Player Type</span>
+      <span class="res-no" id="resNo">TYPE 01 / 03</span>
+    </div>
+    <div class="res-card panel holo-border">
+      <div class="res-emblem"><div class="emblem" id="resEmblem"></div></div>
+      <h2 class="res-name" id="resName"></h2>
+      <p class="res-code" id="resCode"></p>
+      <div class="res-tags" id="resTags"></div>
+      <div class="res-desc" id="resDesc"></div>
+      <div class="sec-label"><span>能力雷达 · ABILITY</span><i></i></div>
+      <div id="resAbil"></div>
+      <div class="sec-label"><span>玩家档案 · PROFILE</span><i></i></div>
+      <div class="res-file" id="resFile"></div>
+    </div>
+    <div class="res-actions">
+      <button class="btn btn-primary" id="btnShare">分享我的结果</button>
+      <button class="btn btn-ghost" id="btnRetry">重新测试</button>
+    </div>
+    <p class="foot-note">PLAYER CORE v1.0 · 本测试仅供娱乐</p>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ======================= 图形符号 ======================= */
+  var GLYPH = {
+    T: '<svg viewBox="0 0 48 48"><path stroke d="M24 9 41 39H7Z"/><path stroke d="M24 21.5 31.5 34h-15Z"/></svg>',
+    V: '<svg viewBox="0 0 48 48"><path stroke d="M27 6 11 28h11l-3 14 16-22H24l3-14Z"/></svg>',
+    R: '<svg viewBox="0 0 48 48"><circle stroke cx="19" cy="24" r="10"/><circle stroke cx="29" cy="24" r="10"/></svg>'
+  };
+
+  /* ======================= 三种人格 ======================= */
+  var TYPES = {
+    T: {
+      key: 'T', no: '01', name: '战术指挥官', code: 'THE ARCHITECT', color: '#7c5cff',
+      tags: ['预判流', '资源管理大师', '复盘狂人', '大局观', '不动如山', '冷面指挥'],
+      desc: [
+        '你玩游戏的时候，脑子永远比手快半步。别人眼里是一团混乱的战场，你眼里是几条清晰的可能性和它们各自的代价。开局前你习惯把后面三步想好，输掉之后你习惯把每一处失误摊开来复盘——不是自责，是你真的想知道答案。',
+        '你的强大不在操作的高光时刻，而在那些看不见的地方：一次提前布好的视野、一次恰到好处的资源倾斜、一句让队伍重新稳住的判断。你不追求最帅的击杀，你追求的是让胜利变得理所当然。',
+        '只是偶尔要注意，过度计算会让你错过一些东西——比如一场本来可以不讲道理、纯粹爽一把的对局。允许自己偶尔不算，也是一种能力。'
+      ],
+      abil: [['战术规划', 93, 'V', .5], ['局势预判', 88, 'V', .6], ['资源运营', 84, 'R', .3], ['情绪稳定', 71, 'R', .9]],
+      file: [['惯用位置', '指挥位 / 决策位'], ['开局习惯', '先看地图，再看装备'], ['口头禅', '「等我开团」']]
+    },
+    V: {
+      key: 'V', no: '02', name: '突击先锋', code: 'THE VANGUARD', color: '#ff4e9b',
+      tags: ['莽就完了', '极限反杀', '节奏发动机', '手感优先', '不怕背锅', '热血上头'],
+      desc: [
+        '你是那种先动起来再说的人。信息不够？那就先打一枪试试——反正试错本身也是信息。你的反应常常先于判断，而神奇的是，它经常是对的。当一局陷入僵持、没人敢开的时候，站出来的通常是你。',
+        '你带给一场对局的不是精密，而是温度。你会把节奏拉快，把气氛点燃，让原本沉闷的一局变成所有人都在喊的那种局。对你来说，游戏最迷人的部分，永远是那一瞬间的肾上腺素。',
+        '你只需要在冲之前多看一眼身后——你的队友，可能没有你那么快。'
+      ],
+      abil: [['反应速度', 93, 'T', .5], ['爆发力', 90, 'T', .4], ['临场直觉', 85, 'R', .5], ['抗压韧性', 72, 'T', .8]],
+      file: [['惯用位置', '突进位 / 前排'], ['开局习惯', '先进场，再看情况'], ['口头禅', '「我先上」']]
+    },
+    R: {
+      key: 'R', no: '03', name: '共鸣者', code: 'THE RESONATOR', color: '#43e5c8',
+      tags: ['夜聊党', '固定班底', '探索派', '氛围担当', '长情玩家', '组队优先'],
+      desc: [
+        '你玩游戏的驱动力，从来不是排行榜。你记得的是某个深夜语音里的笑声，是第一次组队打通的副本，是有人在你掉线回来之后说的一句「没事，我们等你」。你把游戏当作一个可以放下防备的地方。',
+        '你的能力一直被低估。你能察觉到队伍里没人说出口的情绪，能在气氛快要崩掉的时候说一句刚刚好的话。你不一定是最强的那个，但你是让一群人愿意一直一起玩下去的那个。',
+        '有时候你会为了照顾别人而委屈自己的节奏。记得：你在意的那些人，通常也在意你。说出你想要的，也是被允许的。'
+      ],
+      abil: [['协同意识', 93, 'V', .5], ['情绪感知', 90, 'T', .4], ['续航热情', 83, 'T', .3], ['探索欲', 74, 'V', .9]],
+      file: [['惯用位置', '辅助 / 自由人'], ['开局习惯', '先看好友谁在线'], ['口头禅', '「再来一把？」']]
+    }
+  };
+
+  /* ======================= 8 道题 ======================= */
+  var QUESTIONS = [
+    { q: '新游戏第一次启动，开场 CG 刚放完。你的第一件事是——',
+      opts: [['打开设置，把画质、按键、灵敏度全部调成自己顺手的手感', 'T'],
+             ['跳过教程，往最近的怪堆里冲，边打边学', 'V'],
+             ['先在出生点转一圈，把所有 NPC 的对话都点完', 'R']] },
+    { q: '队伍语音里，你最常扮演的那种角色是——',
+      opts: [['「左边两个，等我开团，别抢。」', 'T'],
+             ['「我先上，你们跟上！」', 'V'],
+             ['「没事没事，这把不算，我们再来一把。」', 'R']] },
+    { q: '卡了两个小时的 Boss，还在那里。你会——',
+      opts: [['退出战斗，翻攻略、算伤害、专配一套对策装', 'T'],
+             ['再冲一次，手比脑子快，赌这一把的直觉', 'V'],
+             ['去公屏喊人，或者拉个在线的好友一起打', 'R']] },
+    { q: '你最享受的游戏瞬间是——',
+      opts: [['布局成型，对手一步一步走进你早就预判好的那一步', 'T'],
+             ['残血极限反杀，手指比意识还快的那一秒', 'V'],
+             ['深夜联机，几个人在语音里笑到忘记推主线', 'R']] },
+    { q: '抽卡 / 开箱 / 掉落，出了个意外的好东西——',
+      opts: [['先算一下它对你现有阵容的收益，再决定要不要练', 'T'],
+             ['立刻装上，强不强另说，帅就完事', 'V'],
+             ['截图丢进群里：「兄弟们看我这个」', 'R']] },
+    { q: '游戏里最让你难受的事情是——',
+      opts: [['队友不看小地图、不交技能，白白送掉优势', 'T'],
+             ['被人蹲、被人阴，输得不明不白', 'V'],
+             ['一个人上线，好友列表从头灰到尾', 'R']] },
+    { q: '一局游戏打多久，你比较能接受——',
+      opts: [['只要节奏清楚、每一步都有意义，两小时也无所谓', 'T'],
+             ['越快越好，短平快，一局接一局地冲', 'V'],
+             ['不太在乎时长，在乎的是跟谁一起打', 'R']] },
+    { q: '关掉游戏之后，你通常的状态是——',
+      opts: [['脑子里还在复盘刚才那局，哪一步走错了', 'T'],
+             ['手心还是热的，想着再来一把', 'V'],
+             ['还在群里聊刚才那个名场面', 'R']] }
+  ];
+
+  var SCAN_LINES = ['正在解析答题路径…', '正在比对玩家行为模型…', '正在生成人格标签…'];
+  var CIRC = 2 * Math.PI * 58;
+
+  /* ======================= 状态 ======================= */
+  var state = { i: 0, answers: [], scores: { T: 0, V: 0, R: 0 }, first: {}, lock: false };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var screens = { home: $('s-home'), quiz: $('s-quiz'), scan: $('s-scan'), result: $('s-result') };
+
+  function show(name) {
+    Object.keys(screens).forEach(function (k) { screens[k].classList.toggle('is-active', k === name); });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function glyphHTML(t) { return GLYPH[t]; }
+
+  /* ======================= 计分：主选项 +2，副选项 +1 ======================= */
+  function addScore(qIdx, type) {
+    var alt = qIdx % 2 === 0;
+    var sec = alt ? { T: 'V', V: 'R', R: 'T' } : { T: 'R', V: 'T', R: 'V' };
+    state.scores[type] += 2;
+    state.scores[sec[type]] += 1;
+    if (state.first[type] === undefined) state.first[type] = qIdx;
+  }
+
+  function winner() {
+    var order = ['T', 'V', 'R'].slice().sort(function (a, b) {
+      var d = state.scores[b] - state.scores[a];
+      if (d !== 0) return d;
+      return (state.first[a] === undefined ? 99 : state.first[a]) - (state.first[b] === undefined ? 99 : state.first[b]);
+    });
+    return order[0];
+  }
+
+  /* ======================= 首页 ======================= */
+  $('homeEmblem').innerHTML = '<svg viewBox="0 0 48 48"><path stroke d="M24 12v14"/><circle stroke cx="24" cy="35" r="1.6"/><path stroke d="M24 6 42 38H6Z" opacity=".35"/></svg>';
+
+  /* ======================= 答题 ======================= */
+  var qBody = $('qBody'), qText = $('qText'), qOpts = $('qOpts');
+
+  function renderQuiz() {
+    var q = QUESTIONS[state.i];
+    $('qNow').textContent = String(state.i + 1).padStart(2, '0');
+    $('pFill').style.width = (state.i / QUESTIONS.length * 100) + '%';
+    $('qBackWrap').style.visibility = state.i === 0 ? 'hidden' : 'visible';
+
+    qText.innerHTML = '<span class="qn">Q' + (state.i + 1) + ' / ' + QUESTIONS.length + '</span>' + q.q;
+    qOpts.innerHTML = '';
+
+    q.opts.forEach(function (o, idx) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opt';
+      b.innerHTML = '<span class="key">' + 'ABC'[idx] + '</span><span class="txt">' + o[0] + '</span>';
+      b.addEventListener('click', function () { choose(idx); });
+      qOpts.appendChild(b);
+    });
+  }
+
+  function choose(idx, instant) {
+    if (state.lock) return;
+    var q = QUESTIONS[state.i];
+    if (idx < 0 || idx >= q.opts.length) return;
+    state.lock = true;
+
+    var type = q.opts[idx][1];
+    var nodes = qOpts.querySelectorAll('.opt');
+    for (var k = 0; k < nodes.length; k++) nodes[k].classList.toggle('sel', k === idx);
+    for (var m = 0; m < nodes.length; m++) if (m !== idx) nodes[m].classList.add('dim');
+
+    state.answers.push(idx);
+    addScore(state.i, type);
+    $('pFill').style.width = ((state.i + 1) / QUESTIONS.length * 100) + '%';
+
+    var wait = instant ? 120 : 400;
+    setTimeout(function () {
+      if (state.i === QUESTIONS.length - 1) { startScan(); return; }
+      state.i++;
+      qBody.classList.add('out');
+      setTimeout(function () {
+        renderQuiz();
+        qBody.classList.remove('out');
+        qBody.classList.remove('anim'); void qBody.offsetWidth;
+        qBody.classList.add('anim');
+        state.lock = false;
+      }, 180);
+    }, wait);
+  }
+
+  function goBack() {
+    if (state.lock || state.i === 0) return;
+    state.lock = true;
+    var q = QUESTIONS[state.i - 1];
+    var prev = state.answers.pop();
+    var type = q.opts[prev][1];
+    var alt = (state.i - 1) % 2 === 0;
+    var sec = alt ? { T: 'V', V: 'R', R: 'T' } : { T: 'R', V: 'T', R: 'V' };
+    state.scores[type] -= 2;
+    state.scores[sec[type]] -= 1;
+    state.i--;
+    qBody.classList.add('out');
+    setTimeout(function () {
+      renderQuiz();
+      qBody.classList.remove('out');
+      qBody.classList.remove('anim'); void qBody.offsetWidth;
+      qBody.classList.add('anim');
+      state.lock = false;
+    }, 180);
+  }
+
+  /* ======================= 分析动画 ======================= */
+  function startScan() {
+    show('scan');
+    $('pFill').style.width = '100%';
+    var prog = $('scanProg'), pct = $('scanPct'), line = $('scanLine');
+    prog.style.strokeDasharray = CIRC;
+    prog.style.strokeDashoffset = CIRC;
+
+    var DUR = 1750, t0 = performance.now(), lineIdx = 0;
+    line.textContent = SCAN_LINES[0];
+
+    (function frame(now) {
+      var p = Math.min(1, (now - t0) / DUR);
+      var e = 1 - Math.pow(1 - p, 2.2);
+      prog.style.strokeDashoffset = CIRC * (1 - e);
+      pct.textContent = Math.round(e * 100);
+      var li = Math.min(SCAN_LINES.length - 1, Math.floor(p * SCAN_LINES.length));
+      if (li !== lineIdx) { lineIdx = li; line.textContent = SCAN_LINES[li]; }
+      if (p < 1) requestAnimationFrame(frame);
+      else setTimeout(showResult, 90);
+    })(t0);
+  }
+
+  /* ======================= 结果 ======================= */
+  /* 能力值 = 该人格的基准画像 × 主导强度（你的答案越集中，画像越鲜明）
+             + 交叉人格的微调（例如战术型但共鸣分也高，情绪稳定会明显抬升） */
+  function ability(w, own, s) {
+    var dom = Math.max(0, Math.min(1, (s[own] / 24 - 1 / 3) / (1 / 3)));
+    var v = w[1] * (0.72 + 0.28 * dom) + w[3] * (s[w[2]] - 8);
+    return Math.max(42, Math.min(96, Math.round(v)));
+  }
+
+  function showResult() {
+    var key = winner();
+    var d = TYPES[key];
+
+    $('resNo').textContent = 'TYPE ' + d.no + ' / 03';
+    $('resEmblem').innerHTML = glyphHTML(key);
+    $('resName').textContent = d.name;
+    $('resCode').textContent = d.code;
+
+    $('resTags').innerHTML = d.tags.map(function (t, i) {
+      return '<span class="tag" style="animation-delay:' + (i * 55) + 'ms"># ' + t + '</span>';
+    }).join('');
+
+    $('resDesc').innerHTML = d.desc.map(function (p) { return '<p>' + p + '</p>'; }).join('');
+
+    $('resAbil').innerHTML = d.abil.map(function (a) {
+      var v = ability(a, key, state.scores);
+      return '<div class="abil"><div class="abil-top"><span>' + a[0] + '</span><b>' + v + '%</b></div>' +
+             '<div class="abil-bar"><i data-w="' + v + '"></i></div></div>';
+    }).join('');
+
+    $('resFile').innerHTML = d.file.map(function (r) {
+      return '<div class="file-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>';
+    }).join('');
+
+    show('result');
+
+    // 能力条依次生长，颜色取自该人格的主色
+    var bars = $('resAbil').querySelectorAll('.abil-bar i');
+    Array.prototype.forEach.call(bars, function (bar, i) {
+      bar.style.background = 'linear-gradient(90deg,' + d.color + 'aa,' + d.color + ')';
+      bar.style.boxShadow = '0 0 12px ' + d.color + '80';
+      bar.style.transitionDelay = (140 + i * 110) + 'ms';
+      requestAnimationFrame(function () { requestAnimationFrame(function () { bar.style.width = bar.dataset.w + '%'; }); });
+    });
+  }
+
+  /* ======================= 交互 ======================= */
+  function reset() {
+    state = { i: 0, answers: [], scores: { T: 0, V: 0, R: 0 }, first: {}, lock: false };
+    renderQuiz();
+    show('quiz');
+  }
+
+  $('btnStart').addEventListener('click', function () { reset(); });
+  $('btnRetry').addEventListener('click', function () { reset(); });
+  $('btnBack').addEventListener('click', goBack);
+
+  document.addEventListener('keydown', function (e) {
+    if (!screens.quiz.classList.contains('is-active')) return;
+    if (['1', '2', '3'].indexOf(e.key) > -1) choose(parseInt(e.key, 10) - 1);
+    if (e.key === 'Backspace') goBack();
+  });
+
+  /* ======================= 分享 ======================= */
+  var toastEl = $('toast'), toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, 2600);
+  }
+
+  $('btnShare').addEventListener('click', function () {
+    var d = TYPES[winner()];
+    var url = location.href.split('#')[0];
+    var text = '我的游戏人格是「' + d.name + ' ' + d.code + '」——#' + d.tags[0] + ' #' + d.tags[1] + '。\n你是什么样的玩家？来测一下：' + url;
+
+    if (navigator.share) {
+      navigator.share({ title: '玩家图鉴 · 我的游戏人格', text: '我的游戏人格是「' + d.name + '」，你是什么样的玩家？', url: url })
+        .then(function () { toast('已唤起分享'); })
+        .catch(function () { copy(text); });
+    } else {
+      copy(text);
+    }
+  });
+
+  function copy(text) {
+    var done = function () { toast('结果文案已复制，去粘贴给朋友吧'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { fallback(text, done); });
+    } else { fallback(text, done); }
+  }
+  function fallback(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动选择链接'); }
+    document.body.removeChild(ta);
+  }
+
+  /* 预渲染第一题，保证从首页进入时进度条从 0 起跳 */
+  renderQuiz();
+})();
+</script>
+</body>
+</html>
