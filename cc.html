@@ -66,6 +66,31 @@ body{
   box-shadow:0 1px 0 rgba(13,22,34,.18)}
 .bottomline{position:fixed;left:0;right:0;bottom:0;height:6px;z-index:6;opacity:.55;
   background:repeating-linear-gradient(45deg,#ffc400 0 10px,#151b24 10px 20px)}
+/* ---------- 电竞图案装饰层（压在背景与内容之间） ---------- */
+.deco{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.deco svg{position:absolute;display:block}
+/* 准星 · 右上 */
+.deco .reticle{right:7vw;top:8vh;width:118px;height:118px;opacity:.5;animation:spin 44s linear infinite}
+/* 蜂巢六边形群 · 右下 */
+.deco .hexes{right:-36px;bottom:7vh;width:300px;height:220px;opacity:.5}
+/* 电路走线 · 左上 */
+.deco .circuit{left:-16px;top:7vh;width:210px;height:170px;opacity:.45}
+/* 雷达同心环 · 左侧 */
+.deco .rings{left:-70px;top:46vh;width:250px;height:250px;opacity:.4;animation:spin 70s linear infinite reverse}
+/* 人字纹推进箭头 · 左下 */
+.deco .chevrons{left:4vw;bottom:15vh;width:56px;height:150px;opacity:.4}
+.deco .chevrons g{animation:march 2.2s ease-in-out infinite}
+@keyframes march{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+/* 取景括角 · 广播层角落 */
+.corner{position:fixed;width:26px;height:26px;z-index:1;pointer-events:none;
+  border:0 solid rgba(255,92,20,.45)}
+.corner.tl{left:12px;top:12px;border-left-width:2px;border-top-width:2px}
+.corner.br{right:12px;bottom:12px;border-right-width:2px;border-bottom-width:2px}
+@media (max-width:640px){
+  .deco .circuit,.deco .rings{display:none}
+  .deco .reticle{width:86px;height:86px;right:3vw;top:4vh;opacity:.4}
+  .deco .chevrons{bottom:22vh}
+}
 /* ---------- 布局 ---------- */
 .stage{position:relative;z-index:2;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;
   max-width:560px;margin:0 auto;padding:32px 20px calc(34px + env(safe-area-inset-bottom))}
@@ -256,6 +281,61 @@ h1 em::after{content:"";position:absolute;left:-3px;right:-3px;bottom:2px;height
 </div>
 <div class="topline" aria-hidden="true"></div>
 <div class="bottomline" aria-hidden="true"></div>
+
+<!-- 电竞图案装饰层 -->
+<div class="deco" aria-hidden="true">
+  <!-- 准星 · 右上 -->
+  <svg class="reticle" viewBox="0 0 120 120">
+    <circle cx="60" cy="60" r="44" fill="none" stroke="#ff5c14" stroke-width="1.6" stroke-dasharray="4 8"/>
+    <circle cx="60" cy="60" r="28" fill="none" stroke="#ff5c14" stroke-width="1.2" opacity=".55"/>
+    <path d="M60 4v20M60 96v20M4 60h20M96 60h20" stroke="#ff5c14" stroke-width="2.4"/>
+    <circle cx="60" cy="60" r="3.4" fill="#ff5c14"/>
+  </svg>
+  <!-- 蜂巢六边形群 · 右下 -->
+  <svg class="hexes" viewBox="0 0 300 220">
+    <defs>
+      <polygon id="hx" points="50,0 100,29 100,87 50,116 0,87 0,29" fill="none" stroke="#0a86d6" stroke-width="1.5"/>
+    </defs>
+    <use href="#hx" x="120" y="0" opacity=".85"/>
+    <use href="#hx" x="170" y="52" opacity=".55"/>
+    <use href="#hx" x="120" y="104" opacity=".7"/>
+    <use href="#hx" x="70" y="52" opacity=".35"/>
+    <use href="#hx" x="220" y="104" opacity=".3"/>
+  </svg>
+  <!-- 电路走线 · 左上 -->
+  <svg class="circuit" viewBox="0 0 220 180">
+    <g fill="none" stroke="#0ab0b8" stroke-width="1.6">
+      <path d="M0 30h70l18 18h50"/>
+      <path d="M0 60h40l20 20h44l16 16h80"/>
+      <path d="M0 96h58l16-16h38"/>
+      <path d="M30 130h60l18 18h70"/>
+    </g>
+    <g fill="#0ab0b8">
+      <rect x="136" y="44" width="7" height="7"/>
+      <rect x="156" y="92" width="7" height="7"/>
+      <rect x="110" y="74" width="7" height="7"/>
+      <rect x="176" y="144" width="7" height="7"/>
+    </g>
+  </svg>
+  <!-- 雷达同心环 · 左侧 -->
+  <svg class="rings" viewBox="0 0 260 260">
+    <circle cx="130" cy="130" r="120" fill="none" stroke="#ff5c14" stroke-width="1.2" stroke-dasharray="3 9" opacity=".8"/>
+    <circle cx="130" cy="130" r="86" fill="none" stroke="#0d1622" stroke-width="1" stroke-dasharray="2 7" opacity=".4"/>
+    <circle cx="130" cy="130" r="52" fill="none" stroke="#ff5c14" stroke-width="1.2" opacity=".35"/>
+    <circle cx="130" cy="130" r="4" fill="#ff5c14" opacity=".55"/>
+  </svg>
+  <!-- 人字纹推进箭头 · 左下 -->
+  <svg class="chevrons" viewBox="0 0 60 150">
+    <g fill="none" stroke="#0d1622" stroke-width="3">
+      <path d="M8 8l22 14-22 14"/>
+      <path d="M8 46l22 14-22 14"/>
+      <path d="M8 84l22 14-22 14"/>
+      <path d="M8 122l22 14-22 14"/>
+    </g>
+  </svg>
+</div>
+<div class="corner tl" aria-hidden="true"></div>
+<div class="corner br" aria-hidden="true"></div>
 
 <main class="stage">
 
